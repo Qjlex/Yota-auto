@@ -25,31 +25,9 @@ int socket_select( int socket, int timeout )
     return 1;
 }
 
-char *socket_http_get_status_code( int socket, int timeout )
+__inline__ int socket_receive( int socket, const char *buffer, unsigned int buffer_length )
 {
-    char *result = NULL;
-
-    if( socket_select( socket, timeout ) == 0 )
-    {
-    	return result;
-    }
-
-    int buffer_length = 24;
-    char *buffer = ( char * )malloc( buffer_length );
-    if( recv( socket, buffer, buffer_length, 0 ) != buffer_length )
-    {
-    	free( buffer );
-    	return result;
-    }
-
-	result = ( char * )malloc( 4 );
-	memcpy( result, buffer + 9, 3 );
-	*( result + 3 ) = '\0';
-
-    while( recv( socket, buffer, buffer_length, 0 ) == buffer_length );
-    free( buffer );
-   
-    return result;
+   return recv( socket, buffer, buffer_length, 0 );
 }
 
 __inline__ unsigned short int socket_send( int socket, const char *buffer, int buffer_size )

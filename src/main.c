@@ -10,7 +10,7 @@ int main( int argc, const char *argv[] )
                    "User-Agent: qURL\r\n"
                    "Accept: */*\r\n"
                    "\r\n";
-    if( http_packet_send_and_check_status_code( "hello.yota.ru", packet, "200" ) == 0 )
+    if( http_packet_send_and_check_status_code( "hello.yota.ru", packet, "200" ) != 1 )
     {
         return 2;
     }
