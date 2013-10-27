@@ -25,7 +25,7 @@ int socket_select( int socket, int timeout )
     return 1;
 }
 
-__inline__ int socket_receive( int socket, const char *buffer, unsigned int buffer_length )
+__inline__ int socket_receive( int socket, char *buffer, unsigned int buffer_length )
 {
    return recv( socket, buffer, buffer_length, 0 );
 }
