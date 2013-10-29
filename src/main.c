@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
 #include "http.h"
 
+const unsigned int sleep_time = 5 * 60 * 1000 * 1000; // 5 minute
 const char *get_packet = "GET /light/?redirurl=http://mail.ru HTTP/1.1\r\n"
                    "Host: hello.yota.ru\r\n"
                    "Connection: keep-alive\r\n"
@@ -21,17 +24,46 @@ const char *get_packet = "GET /light/?redirurl=http://mail.ru HTTP/1.1\r\n"
              "accept_lte=1&redirurl=http%3A%2F%2Fmail.ru&city=spb&connection_type=light&service_id=Sliders_Free_Temp";            
 const unsigned short post_packet_length = 345;
 
-int main( int argc, const char *argv[] )
+void main_loop()
 {
-    if( http_packet_send_and_check_status_code( "hello.yota.ru", get_packet, get_packet_length, "200" ) != 1 )
-    {
-        return 2;
-    }
+	while(1)
+	{
+	    if( http_packet_send_and_check_status_code( "hello.yota.ru", get_packet, get_packet_length, "200" ) == 1 )
+	    {
+		    http_packet_send_and_check_status_code( "hello.yota.ru", post_packet, post_packet_length, "302" );
+		}
 
-    if( http_packet_send_and_check_status_code( "hello.yota.ru", post_packet, post_packet_length, "302" ) == 1 )
+		usleep( sleep_time );
+	}
+}
+
+int main( int argc, const char** argv )
+{
+    int pid = fork();
+    if ( pid == -1 )
     {
+        return -1;
+    }
+    else if ( !pid )
+    {
+        umask(0);
+        setsid();
+        chdir("/");
+        
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
+        
+	    FILE *file_stream = fopen("/var/run/yota-auto.pid", "w+");
+	    if (file_stream)
+	    {
+	        fprintf(file_stream, "%u", getpid());
+	        fclose(file_stream);
+	    }
+
+        main_loop();
         return 0;
     }
 
-    return 1;
+	return 0;
 }
