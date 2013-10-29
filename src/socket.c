@@ -44,6 +44,7 @@ struct sockaddr_in socket_create_sockaddr_in( const char *hostName, int port )
 
     struct hostent *lphost = gethostbyname( hostName );
     memcpy( &( result.sin_addr ), lphost->h_addr, lphost->h_length );
+    free(lphost);
     return result;
 }
 
