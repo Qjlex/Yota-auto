@@ -5,14 +5,18 @@
 
 int get_connected_socket( const char *host )
 {
-    int result;
+    int result = -1;
 
-    struct sockaddr_in addr = socket_create_sockaddr_in( host, 80 );
-    result = socket_create( addr );
-    if( socket_connect( result, addr ) == 0 )
+    struct sockaddr_in *addr = socket_create_sockaddr_in( host, 80 );
+    if( addr != NULL )
     {
-        result = -1;
-    }
+	    result = socket_create( *addr );
+	    if( socket_connect( result, *addr ) == 0 )
+	    {
+	        result = -1;
+	    }
+	    free( addr );
+	}
 
     return result;
 }

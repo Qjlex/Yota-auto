@@ -35,15 +35,21 @@ __inline__ unsigned short int socket_send( int socket, const char *buffer, int b
     return send( socket, buffer, buffer_size, 0 ) == buffer_size ? 1 : 0;
 }
 
-struct sockaddr_in socket_create_sockaddr_in( const char *hostName, int port )
+struct sockaddr_in *socket_create_sockaddr_in( const char *hostName, int port )
 {
-    struct sockaddr_in result;
-    memset( &result, '\0', sizeof( result ) );
-    result.sin_family = AF_INET;
-    result.sin_port = htons( port );
+	struct hostent *lphost = gethostbyname( hostName );
+	if( lphost == NULL )
+	{
+		return NULL;
+	}
 
-    struct hostent *lphost = gethostbyname( hostName );
-    memcpy( &( result.sin_addr ), lphost->h_addr, lphost->h_length );
+	int size = sizeof(struct sockaddr_in);
+    struct sockaddr_in *result = (struct sockaddr_in*)malloc( size );
+    memset( result, '\0', size );
+    result->sin_family = AF_INET;
+    result->sin_port = htons( port );
+    
+    memcpy( &( result->sin_addr ), lphost->h_addr, lphost->h_length );
     free(lphost);
     return result;
 }
