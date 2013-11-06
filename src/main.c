@@ -26,11 +26,7 @@ const unsigned short post_packet_length = 345;
 int main( int argc, const char** argv )
 {
     int pid = fork();
-    if ( pid == -1 )
-    {
-        return -1;
-    }
-    else if ( !pid )
+    if ( pid != -1 && !pid )
     {
         umask(0);
         setsid();
@@ -43,20 +39,18 @@ int main( int argc, const char** argv )
 	    FILE *file_stream = fopen("/var/run/yota-auto.pid", "w+");
 	    if (file_stream)
 	    {
-	        fprintf(file_stream, "%u", getpid());
-	        fclose(file_stream);
+	        fprintf( file_stream, "%u", getpid() );
+	        fclose( file_stream );
 	    }
 
         while(1)
+	{
+		if( http_packet_send_and_check_status_code( "hello.yota.ru", get_packet, get_packet_length, "200" ) == 1 )
 		{
-		    if( http_packet_send_and_check_status_code( "hello.yota.ru", get_packet, get_packet_length, "200" ) == 1 )
-		    {
-			    http_packet_send_and_check_status_code( "hello.yota.ru", post_packet, post_packet_length, "302" );
-			}
-
-			usleep( sleep_time );
+		    http_packet_send_and_check_status_code( "hello.yota.ru", post_packet, post_packet_length, "302" );
 		}
-        return 0;
+		usleep( sleep_time );
+	}
     }
 
 	return 0;
